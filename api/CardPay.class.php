@@ -34,6 +34,7 @@ protected $linkService="https://sandbox.silkpay.fr";
 protected $linkWebPayment = "/silkpay/app/card/webpay";//That method allows the merchant to generate a redirection link in order to redirect the customer to the card payment page. 
 protected $linkOrderQuery = "/silkpay/app/card/orderquery";//That method allows the merchant to the updated status for an CardPay transaction. 
 protected $linkRefund = "/silkpay/app/card/refund";//That method allows the merchant to generate a refund for specific transaction.
+protected $cid;
 protected $amount;
 protected $currency;
 protected $url_ok= "url_ok.php";
@@ -48,43 +49,61 @@ protected $street;
 protected $postal_code;
 protected $city;
 protected $country;
-        
+protected $transaction_number;
+protected $transactionid;
+
 
 
 
  //执行支付接口
-    public function pay($amount,$currency,$mail,$phone,$ip,$lastname,$firstname,$street,$postal_code,$city,$country){
+    public function pay($cid,$amount,$currency,$mail,$phone,$ip,$lastname,$firstname,$street,$postal_code,$city,$country){
     //获取参数
-     $data=$this->getParameter(); 
-     $url = $this->linkService . $this->linkWebPayment;
-     $data["signature"] = $this->generateSignature($data);
+    $data=$this->getParameter(); 
+    $data['cid']=$this->cid;
+    $data['amount']=$this->amount;
+    $data['currency']=$this->currency;    
+    $data['url_ok']=$this->url_ok;
+    $data['cancel_url']=$this->cancel_url;
+    $data['notify_url']=$this->notify_url;
+    $data['mail']=$this->mail;
+    $data['phone']=$this->phone;
+    $data['ip']=$this->ip;
+    $data['firstname']=$this->firstname;   
+    $data['lastname']=$this->lastname; 
+    $data['street']=$this->street; 
+    $data['postal_code']=$this->postal_code;
+    $data['city']=$this->city;    
+    $data['country']=$this->country; 
+    $url = $this->linkService . $this->linkWebPayment;
+    $data["signature"] = $this->generateSignature($data);
     //前往付款接口
      return $this->executeCall($url, $data);  
     }
-
+    
+//验证数据，验证支付的正确性
+    public function query(){
+    //获取参数
+     $data=$this->getParameter();
+     $data['transaction_number']=$this->transaction_number;
+     $url = $this->linkService . $this->linkOrderQuery;
+     $data["signature"] = $this->generateSignature($data);
+     //调用验证接口
+     return $this->executeCall($url, $data);
+    }  
+       
  //退款接口
     public function refund(){
     //获取参数
      $data=$this->getParameter(); 
+     $data['transactionid']=$this->transactionid;
+     $data['amount']=$this->amount;
      $url = $this->linkService . $this->linkRefund;
      $data["signature"] = $this->generateSignature($data);
      //调用退款接口
      return $this->executeCall($url, $data);
     }
 
- //验证数据，验证支付的正确性
-    public function query(){
-    //获取参数
-     $data=$this->getParameter();
-     $url = $this->linkService . $this->linkOrderQuery;
-     $data["signature"] = $this->generateSignature($data);
-     //调用验证接口
-     return $this->executeCall($url, $data);
-    }  
-
- //查询支付订单
-   // public function query($transaction_id);  //查询订单 验证支付时候要用
-
+ 
  
 /***************************工具函数***************************************************/
 //构造函数
@@ -168,7 +187,7 @@ protected $country;
     }
     
  //根据用户传参数获取一个$data数组的数据
-    public function getParameter(){
+    public function getParameter1(){
     //webPayment相关数据的获取
     $data['uid']=$this->uid;
     $data['sid']=$this->sid;
@@ -198,6 +217,16 @@ protected $country;
      if(!empty($_POST['amount'])) $data['amount']=$_POST['amount'];  
      return $data;
     }    
+    
+    //根据用户传参数获取一个$data数组的数据
+    public function getParameter(){
+    //webPayment相关数据的获取
+    $data['uid']=$this->uid;
+    $data['sid']=$this->sid;
+    $data['key']=$this->key;
+    $data['timestamp']=time(); 
+    return $data;
+    }
 }
 
 
