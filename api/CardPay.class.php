@@ -24,7 +24,7 @@ Public string key;
 2.发起支付的小程序页面（如果有需要用户提供是参数）。
 
  */
-namespace api;
+//namespace api;
 
 Class CardPay{
 protected $uid="170";
@@ -34,57 +34,59 @@ protected $linkService="https://sandbox.silkpay.fr";
 protected $linkWebPayment = "/silkpay/app/card/webpay";//That method allows the merchant to generate a redirection link in order to redirect the customer to the card payment page. 
 protected $linkOrderQuery = "/silkpay/app/card/orderquery";//That method allows the merchant to the updated status for an CardPay transaction. 
 protected $linkRefund = "/silkpay/app/card/refund";//That method allows the merchant to generate a refund for specific transaction.
-protected $cid;
-protected $amount;
-protected $currency;
-protected $url_ok= "url_ok.php";
-protected $cancel_url="cancel_url.php";
-protected $notify_url="notify_url.php";
-protected $mail;
-protected $phone;
-protected $ip;
-protected $lastname;
-protected $firstname;
-protected $street;
-protected $postal_code;
-protected $city;
-protected $country;
-protected $transaction_number;
-protected $transactionid;
-
-
-
+//protected $cid;
+//protected $amount;
+protected $currency="EUR";
+protected $url_ok= "http://localhost:8090/apiPayment/api/url_ok.php";
+protected $cancel_url="http://localhost:8090/apiPayment/api/cancel_url.php";
+protected $notify_url="http://localhost:8090/apiPayment/api/notify_url.php";
+//protected $mail;
+//protected $phone;
+//protected $ip;
+//protected $lastname;
+//protected $firstname;
+//protected $street;
+//protected $postal_code;
+//protected $city;
+//protected $country;
+//protected $transaction_number;
+//protected $transactionid;
 
  //执行支付接口
-    public function pay($cid,$amount,$currency,$mail,$phone,$ip,$lastname,$firstname,$street,$postal_code,$city,$country){
+    public function pay($cid,$amount,$mail,$phone,$ip,$lastname,$firstname,$street,$postal_code,$city,$country){
     //获取参数
     $data=$this->getParameter(); 
-    $data['cid']=$this->cid;
-    $data['amount']=$this->amount;
-    $data['currency']=$this->currency;    
+    $data['cid']=$cid;
+    $data['amount']=$amount;
+    $data['currency']=$this->currency;
     $data['url_ok']=$this->url_ok;
     $data['cancel_url']=$this->cancel_url;
     $data['notify_url']=$this->notify_url;
-    $data['mail']=$this->mail;
-    $data['phone']=$this->phone;
-    $data['ip']=$this->ip;
-    $data['firstname']=$this->firstname;   
-    $data['lastname']=$this->lastname; 
-    $data['street']=$this->street; 
-    $data['postal_code']=$this->postal_code;
-    $data['city']=$this->city;    
-    $data['country']=$this->country; 
+    $data['mail']=$mail;
+    $data['phone']=$phone;
+    $data['ip']=$ip;
+    $data['firstname']=$firstname;   
+    $data['lastname']=$lastname; 
+    $data['street']=$street; 
+    $data['postal_code']=$postal_code;
+    $data['city']=$city;    
+    $data['country']=$country; 
     $url = $this->linkService . $this->linkWebPayment;
     $data["signature"] = $this->generateSignature($data);
     //前往付款接口
-     return $this->executeCall($url, $data);  
+     $pay=$this->executeCall($url, $data);
+     $this->redirect($pay->redirect_url);
+     //$redirect_url=$pay->redirect_url;
+     //header("Location: $redirect_url");
+     return $pay;  
     }
     
 //验证数据，验证支付的正确性
-    public function query(){
+    public function query($cid,$transaction_number){
     //获取参数
      $data=$this->getParameter();
-     $data['transaction_number']=$this->transaction_number;
+     $data['cid']=$cid;
+     $data['transaction_number']=$transaction_number;
      $url = $this->linkService . $this->linkOrderQuery;
      $data["signature"] = $this->generateSignature($data);
      //调用验证接口
@@ -92,11 +94,12 @@ protected $transactionid;
     }  
        
  //退款接口
-    public function refund(){
+    public function refund($cid,$transactionid,$amount){
     //获取参数
      $data=$this->getParameter(); 
-     $data['transactionid']=$this->transactionid;
-     $data['amount']=$this->amount;
+     $data['cid']=$cid;
+     $data['transactionid']=$transactionid;
+     $data['amount']=$amount;
      $url = $this->linkService . $this->linkRefund;
      $data["signature"] = $this->generateSignature($data);
      //调用退款接口
@@ -186,37 +189,6 @@ protected $transactionid;
         return $decoded_response; 
     }
     
- //根据用户传参数获取一个$data数组的数据
-    public function getParameter1(){
-    //webPayment相关数据的获取
-    $data['uid']=$this->uid;
-    $data['sid']=$this->sid;
-    $data['key']=$this->key;
-    $data['timestamp']=time(); 
-    if(!empty($_POST['cid'])) $data['cid']=$_POST['cid'];
-    if(!empty($_POST['amount'])) $data['amount']=$_POST['amount'];
-    if(!empty($_POST['currency'])) $data['currency']=$_POST['currency'];    
-    if(!empty($_POST['url_ok'])) $data['url_ok']=$_POST['url_ok'];
-    if(!empty($_POST['cancel_url'])) $data['cancel_url']=$_POST['cancel_url'];
-    if(!empty($_POST['notify_url'])) $data['notify_url']=$_POST['notify_url'];
-    if(!empty($_POST['mail'])) $data['mail']=$_POST['mail'];
-    if(!empty($_POST['phone'])) $data['phone']=$_POST['phone'];
-    if(!empty($_POST['ip'])) $data['ip']=$_POST['ip'];
-    if(!empty($_POST['firstname'])) $data['firstname']=$_POST['firstname'];   
-    if(!empty($_POST['lastname'])) $data['lastname']=$_POST['lastname']; 
-    if(!empty($_POST['street'])) $data['street']=$_POST['street']; 
-    if(!empty($_POST['postal_code'])) $data['postal_code']=$_POST['postal_code'];
-    if(!empty($_POST['city'])) $data['city']=$_POST['city'];    
-    if(!empty($_POST['country'])) $data['country']=$_POST['country']; 
-    
-     //orderQuery相关数据的获取 
-    if(!empty($_POST['transaction_number'])) $data['transaction_number']=$_POST['transaction_number']; 
-    
-    //refund相关数据的获取
-     if(!empty($_POST['transactionid'])) $data['transactionid']=$_POST['transactionid'];    
-     if(!empty($_POST['amount'])) $data['amount']=$_POST['amount'];  
-     return $data;
-    }    
     
     //根据用户传参数获取一个$data数组的数据
     public function getParameter(){
@@ -227,10 +199,42 @@ protected $transactionid;
     $data['timestamp']=time(); 
     return $data;
     }
+   
+  //重定向函数
+   public function redirect($url)
+{
+    header("Location: $url");
+    exit();
+    }
 }
 
 
 
+
+
+//获取数据
+    if(!empty($_POST['cid'])) $cid=$_POST['cid'];
+    if(!empty($_POST['amount'])) $amount=$_POST['amount'];
+    if(!empty($_POST['currency'])) $currency=$_POST['currency'];    
+    if(!empty($_POST['url_ok'])) $url_ok=$_POST['url_ok'];
+    if(!empty($_POST['cancel_url'])) $cancel_url=$_POST['cancel_url'];
+    if(!empty($_POST['notify_url'])) $notify_url=$_POST['notify_url'];
+    if(!empty($_POST['mail'])) $mail=$_POST['mail'];
+    if(!empty($_POST['phone'])) $phone=$_POST['phone'];
+    if(!empty($_POST['ip'])) $ip=$_POST['ip'];
+    if(!empty($_POST['firstname'])) $firstname=$_POST['firstname'];   
+    if(!empty($_POST['lastname'])) $lastname=$_POST['lastname']; 
+    if(!empty($_POST['street'])) $street=$_POST['street']; 
+    if(!empty($_POST['postal_code'])) $postal_code=$_POST['postal_code'];
+    if(!empty($_POST['city'])) $city=$_POST['city'];    
+    if(!empty($_POST['country'])) $country=$_POST['country']; 
+    //orderQuery相关数据的获取 
+    if(!empty($_POST['transaction_number'])) $transaction_number=$_POST['transaction_number']; 
+    //refund相关数据的获取
+     if(!empty($_POST['transactionid'])) $transactionid=$_POST['transactionid'];    
+     if(!empty($_POST['amount'])) $amount=$_POST['amount'];  
+     
+     
 //测试pay接口
 /*结果
  * object(stdClass)#2 (10) { ["cid"]=> string(2) "16" 
@@ -244,31 +248,44 @@ protected $transactionid;
  * ["redirect_type"]=> string(3) "URL" 
  * ["signature"]=> string(40) "a7a9e837f810f41cfdbbdb6d7fe9cecf7e01cac0" } 
  */
-//$pay = CardPay::getInstance()->pay();
-//var_dump($pay);
+
+
+
+$pay = CardPay::getInstance()->pay($cid,$amount,$mail,$phone,$ip,$lastname,$firstname,$street,$postal_code,$city,$country,$currency);
+var_dump($pay->redirect_url);
 //echo ("<!DOCTYPE html><html><head><title>refund test</title><meta charset= 'UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'></head><body>");
 //echo $pay;
 //echo ("</body></html>");
 
 //测试query接口
 /*结果
- * string(1319) " Silkpay Dashboard 500 - 
- * Internal Server Error If the problem persists, 
- * please contact us return to the homepage. 
- * Veuillez saisir votre message ci-dessous, 
- * nous vous répondrons dans les plus brefs délais. 
- * Send ©2020-SilkPay SAS Terms & Conditions Contact us " 
+ * object(stdClass)#2 (9) 
+ * { ["error_code"]=> string(5) "00000" 
+ * ["response_code"]=> string(2) "OK" 
+ * ["timestamp"]=> int(1593003119) 
+ * ["message"]=> string(23) "The transaction is paid" 
+ * ["signature"]=> string(40) "bdfab019ba6e0b9c95a12105e7a3581960e66545" 
+ * ["transactionid"]=> string(24) "202006241233142135558481" 
+ * ["paid_time"]=> string(19) "2020-06-24 14:34:00" 
+ * ["cid"]=> string(2) "30" 
+ * ["status"]=> string(4) "PAID" } 
  */ 
-$query = CardPay::getInstance()->query();
-var_dump($query);
+//$query = CardPay::getInstance()->query($cid,$transaction_number);
+//var_dump($query);
 
 
 //测试refund接口
 //return 10083 Transaction not found
 /*结果
- * 10101	Refund / Cancel transaction failed (Refund and Cancel)
+ * object(stdClass)#2 (6) 
+ * { ["error_code"]=> string(5) "00000" 
+ * ["response_code"]=> string(2) "OK" 
+ * ["message"]=> string(15) "request success" 
+ * ["timestamp"]=> int(1593004659) 
+ * ["signature"]=> string(40) "1b7924e0fc16bdc4ef4f448ec716f90c3c383da8" 
+ * ["cid"]=> string(2) "31" } 
  */
- //$refund = CardPay::getInstance()->refund();
+ //$refund = CardPay::getInstance()->refund($cid,$transactionid,$amount);
  //var_dump($refund);
 
 
