@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>payment test</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div>payment test</div>
+        
+<form method="post" action="../api/CardPay.class.php"> 
+<p><input type="text" name="cid" value="1" />Call identification number</p>
+<p><input type="text" name="amount" value="0.01" />Amount of the transaction, for exemple 0.01</p>
+<p><input type="text" name="currency" value="EUR" />Currency of the transaction, for exemple 'EUR'</p>
+<p><input type="text" name="url_ok" value="http://localhost:8090/apiPayment/url/url_ok.php" />URL is used to return to a page after a validation of transaction</p>
+<p><input type="text" name="cancel_url" value="http://localhost:8090/apiPayment/url/cancel_url.php" />URL is used to return to a page when customer cancel a transaction</p>
+<p><input type="text" name="notify_url" value="http://localhost:8090/apiPayment/url/notify_url.php" />URL is used to get the notification after a validation of transaction</p>
+<p><input type="text" name="mail" value="leowjy123456@qq.com" />Customer’s mail address</p>
+<p><input type="text" name="phone" value="0650385624" />Customer’s phone number</p>
+<p><input type="text" name="ip" value="192.168.0.3" />Customer’s ip</p>
+<p><input type="text" name="firstname" value="wu" />Customer’s firstname</p>
+<p><input type="text" name="lastname" value="junyi" />Customer’s lastname</p>
+<p><input type="text" name="street" value="9 rue Escoussières Arnaud Bernard" />Customer’s street</p>
+<p><input type="text" name="postal_code" value="310001" />Customer’s city postal code</p>
+<p><input type="text" name="city" value="Toulouse" />Customer’s city</p>
+<p><input type="text" name="country" value="FR" />Customer’s country - iso3166 format (FR, UK)</p>
+
+<p><input type="submit" value="Rapporter" ></p>
+
+</form>
+    </body>
+</html>
